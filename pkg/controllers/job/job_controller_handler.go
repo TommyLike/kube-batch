@@ -149,6 +149,7 @@ func (cc *Controller) addPod(obj interface{}) {
 			pod.Namespace, pod.Name)
 		return
 	}
+	glog.Errorf("starting to add pod %v", pod)
 
 	req := apis.Request{
 		Namespace: pod.Namespace,
@@ -177,6 +178,7 @@ func (cc *Controller) updatePod(oldObj, newObj interface{}) {
 		glog.Errorf("Failed to convert %v to v1.Pod", newObj)
 		return
 	}
+	glog.Errorf("starting to update pod %v", newPod)
 
 	taskName, found := newPod.Annotations[vkbatchv1.TaskSpecKey]
 	if !found {

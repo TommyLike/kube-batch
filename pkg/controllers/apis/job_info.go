@@ -18,6 +18,7 @@ package apis
 
 import (
 	"fmt"
+	"github.com/golang/glog"
 
 	"k8s.io/api/core/v1"
 
@@ -64,6 +65,8 @@ func (ji *JobInfo) AddPod(pod *v1.Pod) error {
 		return fmt.Errorf("duplicated pod")
 	}
 	ji.Pods[taskName][pod.Name] = pod
+	glog.Errorf("starting to add pod in cache %s/%s", pod.Namespace, pod.Name)
+	glog.Errorf("The cache pods now: %v", ji.Pods)
 
 	return nil
 }
@@ -84,6 +87,8 @@ func (ji *JobInfo) UpdatePod(pod *v1.Pod) error {
 	if _, found := ji.Pods[taskName]; !found {
 		return fmt.Errorf("can not find task %s in cache", taskName)
 	}
+	glog.Errorf("starting to update pod in cache %s/%s", pod.Namespace, pod.Name)
+	glog.Errorf("The cache pods: %v", ji.Pods)
 	if _, found := ji.Pods[taskName][pod.Name]; !found {
 		return fmt.Errorf("can not find pod <%s/%s> in cache",
 			pod.Namespace, pod.Name)
