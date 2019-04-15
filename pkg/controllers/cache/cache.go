@@ -56,7 +56,7 @@ func JobKey(job *v1alpha1.Job) string {
 }
 
 func jobTerminated(job *apis.JobInfo) bool {
-	return job.Job == nil && len(job.Pods) == 0
+	return job.Terminating && len(job.Pods) == 0
 }
 
 func jobKeyOfPod(pod *v1.Pod) (string, error) {
@@ -91,7 +91,7 @@ func (jc *jobCache) Get(key string) (*apis.JobInfo, error) {
 		return nil, fmt.Errorf("job <%s> is not ready", key)
 	}
 
-	return job.Clone(), nil
+	return job, nil
 }
 
 // GetStatus returns job status
@@ -162,7 +162,7 @@ func (jc *jobCache) Delete(obj *v1alpha1.Job) error {
 		return fmt.Errorf("failed to find job <%v>", key)
 	}
 
-	jobInfo.Job = nil
+	jobInfo.Terminating = true
 	jc.deleteJob(jobInfo)
 
 	return nil

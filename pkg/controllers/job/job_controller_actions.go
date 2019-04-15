@@ -132,7 +132,7 @@ func (cc *Controller) killJob(jobInfo *apis.JobInfo, nextState state.NextStateFn
 	}
 
 	// Update Job status
-	job, err := cc.vkClients.BatchV1alpha1().Jobs(job.Namespace).UpdateStatus(job)
+	updateJob, err := cc.vkClients.BatchV1alpha1().Jobs(job.Namespace).UpdateStatus(job)
 
 	if err != nil {
 		glog.Errorf("Failed to update status of Job %v/%v: %v",
@@ -140,30 +140,30 @@ func (cc *Controller) killJob(jobInfo *apis.JobInfo, nextState state.NextStateFn
 		return err
 	}
 
-	if e := cc.cache.Update(job); e != nil {
+	if e := cc.cache.Update(updateJob); e != nil {
 		return e
 	}
 
 	// Delete PodGroup
-	if err := cc.kbClients.SchedulingV1alpha1().PodGroups(job.Namespace).Delete(job.Name, nil); err != nil {
+	if err := cc.kbClients.SchedulingV1alpha1().PodGroups(updateJob.Namespace).Delete(updateJob.Name, nil); err != nil {
 		if !apierrors.IsNotFound(err) {
 			glog.Errorf("Failed to delete PodGroup of Job %v/%v: %v",
-				job.Namespace, job.Name, err)
+				updateJob.Namespace, updateJob.Name, err)
 			return err
 		}
 	}
 
 	// Delete Service
-	if err := cc.kubeClients.CoreV1().Services(job.Namespace).Delete(job.Name, nil); err != nil {
+	if err := cc.kubeClients.CoreV1().Services(updateJob.Namespace).Delete(updateJob.Name, nil); err != nil {
 		if !apierrors.IsNotFound(err) {
 			glog.Errorf("Failed to delete Service of Job %v/%v: %v",
-				job.Namespace, job.Name, err)
+				updateJob.Namespace, updateJob.Name, err)
 			return err
 		}
 	}
 
-	if err := cc.pluginOnJobDelete(job); err != nil {
-		cc.recorder.Event(job, v1.EventTypeWarning, string(vkbatchv1.PluginError),
+	if err := cc.pluginOnJobDelete(updateJob); err != nil {
+		cc.recorder.Event(updateJob, v1.EventTypeWarning, string(vkbatchv1.PluginError),
 			fmt.Sprintf("Plugin failed when been executed at job delete, err: %v", err))
 		return err
 	}
@@ -334,7 +334,7 @@ func (cc *Controller) syncJob(jobInfo *apis.JobInfo, nextState state.NextStateFn
 		job.Status.State = nextState(job.Status)
 	}
 
-	job, err := cc.vkClients.BatchV1alpha1().Jobs(job.Namespace).UpdateStatus(job)
+	updatedJob, err := cc.vkClients.BatchV1alpha1().Jobs(job.Namespace).UpdateStatus(job)
 
 	if err != nil {
 		glog.Errorf("Failed to update status of Job %v/%v: %v",
@@ -342,7 +342,7 @@ func (cc *Controller) syncJob(jobInfo *apis.JobInfo, nextState state.NextStateFn
 		return err
 	}
 
-	if e := cc.cache.Update(job); e != nil {
+	if e := cc.cache.Update(updatedJob); e != nil {
 		return e
 	}
 

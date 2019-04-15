@@ -32,27 +32,8 @@ type JobInfo struct {
 	Job *v1alpha1.Job
 	// Note: do not modify the pod here, it is a pointer type,
 	// which point to k8s informer underlying cache.
-	Pods map[string]map[string]*v1.Pod
-}
-
-// Clone jobInfo object
-func (ji *JobInfo) Clone() *JobInfo {
-	job := &JobInfo{
-		Namespace: ji.Namespace,
-		Name:      ji.Name,
-		Job:       ji.Job,
-
-		Pods: make(map[string]map[string]*v1.Pod),
-	}
-
-	for key, pods := range ji.Pods {
-		job.Pods[key] = make(map[string]*v1.Pod)
-		for pn, pod := range pods {
-			job.Pods[key][pn] = pod
-		}
-	}
-
-	return job
+	Pods       map[string]map[string]*v1.Pod
+	Terminating bool
 }
 
 // SetJob is used to set job
