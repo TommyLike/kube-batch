@@ -71,9 +71,6 @@ run-test:
 e2e: kube-batch
 	hack/run-e2e.sh
 
-generate-code:
-	./hack/update-gencode.sh
-
 e2e-kind: vkctl images
 	./hack/run-e2e-kind.sh
 
