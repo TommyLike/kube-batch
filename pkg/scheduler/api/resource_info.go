@@ -18,6 +18,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/golang/glog"
 	"math"
 
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -74,6 +75,7 @@ var minMemory float64 = 10 * 1024 * 1024
 // NewResource create a new resource object from resource list
 func NewResource(rl v1.ResourceList) *Resource {
 	r := EmptyResource()
+	glog.V(3).Infof("inside of NewResource (original one): %v\n", rl)
 	for rName, rQuant := range rl {
 		switch rName {
 		case v1.ResourceCPU:
@@ -88,6 +90,7 @@ func NewResource(rl v1.ResourceList) *Resource {
 			}
 		}
 	}
+	glog.V(3).Infof("inside of NewResource: %v\n", r)
 	return r
 }
 

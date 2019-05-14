@@ -77,6 +77,7 @@ func (enqueue *enqueueAction) Execute(ssn *framework.Session) {
 	emptyRes := api.EmptyResource()
 	nodesIdleRes := api.EmptyResource()
 	for _, node := range ssn.Nodes {
+		glog.V(3).Infof("summing up total resource for node: %s, %v\n", node.Name, node.Allocatable)
 		nodesIdleRes.Add(node.Allocatable.Clone().Multi(1.2).Sub(node.Used))
 	}
 
@@ -108,6 +109,9 @@ func (enqueue *enqueueAction) Execute(ssn *framework.Session) {
 			} else {
 				pgResource := api.NewResource(*job.PodGroup.Spec.MinResources)
 
+				glog.V(3).Infof("the total idle resource is %v\n", nodesIdleRes)
+				glog.V(3).Infof("the minResource is %v\n", job.PodGroup.Spec.MinResources)
+				glog.V(3).Infof("the request resource is %v\n", pgResource)
 				if pgResource.LessEqual(nodesIdleRes) {
 					nodesIdleRes.Sub(pgResource)
 					inqueue = true
